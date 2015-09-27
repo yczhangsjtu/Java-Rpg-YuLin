@@ -1,9 +1,15 @@
+#Maps
+
+map field1 resource/image/map/field1.jpg resource/image/map/field1.map 野外
 map jianyuanzhuang resource/image/map/jianyuanzhuang.jpg resource/image/map/jianyuanzhuang.map 剑源庄
 map hill resource/image/map/hill.jpg resource/image/map/hill.map 小山
 map maze resource/image/map/maze.jpg resource/image/map/maze.map 迷宫
+
+# Sprites
+
 sprite yulin resource/image/role/hero.png LEFT
-setpos yulin 3 3
 setname yulin 宇林
+setpos yulin 3 3
 addmagic yulin 烈火 resource/image/magic/fire.png 19 RED
 addmagic yulin 狂风 resource/image/magic/wind.png 15 GRAY
 addmagic yulin 剧毒 resource/image/magic/poison.png 12 GREEN
@@ -11,38 +17,66 @@ addmagic yulin 冰封 resource/image/magic/ice.png 13 SKYBLUE
 addmagic yulin 混乱 resource/image/magic/confusion.png 15 YELLOW
 addmagic yulin 雷电 resource/image/magic/thunder.png 20 SNOW
 setdefeatless yulin
-addsprite jianyuanzhuang yulin
-sethero yulin
 
 sprite shengshuxiang resource/image/role/shengshuxiang.png LEFT
-addscript shengshuxiang yulin ssxScript1.sc
-addscript yulin shengshuxiang ssxScript1.sc
+setname shengshuxiang 盛舒湘
 setpos shengshuxiang 13 13
 settype shengshuxiang NPC
-setname shengshuxiang 盛舒湘
-addsprite jianyuanzhuang shengshuxiang
 
 sprite dongxixue resource/image/role/rogue.png LEFT
-setpos dongxixue 15 4
 setname dongxixue 董惜雪
-settype dongxixue MONSTER
-addsprite hill dongxixue
+setpos dongxixue 15 4
+settype dongxixue NPC
 
 sprite luwenlong resource/image/role/luwenlong.png LEFT
-setpos luwenlong 20 9
 setname luwenlong 陆文龙
+addmagic luwenlong 烈火 resource/image/magic/fire.png 19 RED
+addmagic luwenlong 狂风 resource/image/magic/wind.png 15 GRAY
+addmagic luwenlong 剧毒 resource/image/magic/poison.png 12 GREEN
+addmagic luwenlong 冰封 resource/image/magic/ice.png 13 SKYBLUE
+addmagic luwenlong 混乱 resource/image/magic/confusion.png 15 YELLOW
+addmagic luwenlong 雷电 resource/image/magic/thunder.png 20 SNOW
+setpos luwenlong 20 9
 settype luwenlong NPC
-addscript yulin luwenlong llwScript1.sc
-addsprite maze luwenlong
 
-#transfer jianyuanzhuang 22 1 hill 2 22
+sprite wuqian resource/image/role/man1.png LEFT
+setname wuqian 无名氏
+setpos wuqian 26 15
+settype wuqian NPC
+
+sprite jinpeng resource/image/role/man2.png LEFT
+setname jinpeng 无名氏
+setpos jinpeng 28 15
+settype jinpeng NPC
+
+sprite nitingyun resource/image/role/woman1.png LEFT
+setname nitingyun 无名氏
+setpos nitingyun 30 15
+settype nitingyun NPC
+
+# Scripts
+
+addscript yulin luwenlong llwScript1.sc
+addscript shengshuxiang yulin ssxScript1.sc
+addscript yulin shengshuxiang ssxScript1.sc
+addscript yulin dongxixue dxxScript1.sc
+
+# Add sprites to maps
+
+addsprite field1 nitingyun
+addsprite field1 jinpeng
+addsprite field1 wuqian
+addsprite jianyuanzhuang yulin
+addsprite jianyuanzhuang shengshuxiang
+addsprite maze luwenlong
+addsprite hill dongxixue
+
+#Transfers
+
 transfer hill 1 22 jianyuanzhuang 21 1
 transfer hill 31 1 maze 1 14
 transfer maze 1 13 hill 31 2
 
-addaction goto_shengshuxiang_yulin
-addaction disablecontrol
-addaction checkclose_shengshuxiang_yulin
-addaction sethero_yulin
+readaction actions1.act
 
-start jianyuanzhuang
+start field1

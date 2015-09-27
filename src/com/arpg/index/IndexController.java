@@ -221,9 +221,8 @@ public final class IndexController extends AbstarctController{
 			{
 				if(follower.following == sprite)
 				{
-					map.removeSprite(follower);
-					dest.addCharacter(follower);
-					follower.setPosition(new Point(x,y));
+					actions.add("changemap "+follower.getId()+" "+map.getId()
+						+" "+dest.getId()+" "+x+" "+y);
 				}
 			}
 			return true;

@@ -24,14 +24,11 @@ public class ImageSpriteFactory{
   private int size = 0;
 
   public ImageSpriteFactory(String fileName){
-    this(fileName, SPRITE_WIDTH, SPRITE_HEIGHT, 4);
-  }
-
-  public ImageSpriteFactory(String fileName, int width, int height, int size){
-    this.size = size;
-    this.imageWidth = width;
-    this.imageHeight = height;
-    this.images = ImageUtils.split(ResourceManager.loadImage(fileName), width, height);
+    this.size = 4;
+	Image image = ResourceManager.loadImage(fileName);
+    this.imageWidth = (int)image.getWidth()/4;
+    this.imageHeight = (int)image.getHeight()/8;
+    this.images = ImageUtils.split(image, imageWidth, imageHeight);
   }
 
   public Image[] getMove(int index){

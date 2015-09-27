@@ -47,6 +47,7 @@ public class ScriptController extends AbstarctController{
   private double fontHeight;
   String target = null;
   private IndexController ic = null;
+  public boolean toFight = false;
 
   public ScriptController(String scriptFile, IndexController idx, Sprite s1, Sprite s2){
     if(!StringUtils.isBlank(scriptFile)){
@@ -188,6 +189,8 @@ public class ScriptController extends AbstarctController{
       }else if("in".equals(instruct)){
         parseSelect();
         break;
+	  }else if("fight".equals(instruct)){
+	  	toFight = true;
       }else{
 	  	if(ic != null && script != null)
 		{

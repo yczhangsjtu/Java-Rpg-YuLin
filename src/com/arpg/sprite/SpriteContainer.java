@@ -65,7 +65,7 @@ public class SpriteContainer implements Comparator<Sprite>{
   public int compare(Sprite one, Sprite two){
   	if(one.getPy() > two.getPy()) return 1;
   	if(one.getPy() < two.getPy()) return -1;
-	return one.getName().compareTo(two.getName());
+	return one.getId().compareTo(two.getId());
   }
 
   /**

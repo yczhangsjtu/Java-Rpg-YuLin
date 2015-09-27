@@ -86,15 +86,18 @@ public final class RpgController extends AbstarctController{
 		if(sc.isRunning()) sc.draw(context);
 		else 
 		{
-			if(sc.talker1.getId() == ic.getHeroId() && sc.talker2.getSpriteType()==SpriteType.MONSTER)
+			if(sc.toFight)
 			{
-				this.fighting = true;
-				this.fc = new FightController(this, sc.talker1, sc.talker2);
-			}
-			else if(sc.talker2.getId() == ic.getHeroId() && sc.talker1.getSpriteType()==SpriteType.MONSTER)
-			{
-				this.fighting = true;
-				this.fc = new FightController(this, sc.talker2, sc.talker1);
+				if(sc.talker1.getId().equals(ic.getHeroId()))
+				{
+					this.fighting = true;
+					this.fc = new FightController(this, sc.talker1, sc.talker2);
+				}
+				else if(sc.talker2.getId().equals(ic.getHeroId()))
+				{
+					this.fighting = true;
+					this.fc = new FightController(this, sc.talker2, sc.talker1);
+				}
 			}
 			sc.talker1.talkTo = null;
 			sc.talker2.talkTo = null;
@@ -148,6 +151,7 @@ public final class RpgController extends AbstarctController{
 		{
 			role.paths = null;
 			role.dest = null;
+			role.setSpriteState(SpriteState.STAND);
 		}
 	  	else if(role.paths != null && role.paths.size() > 1 && !role.isMoving()){
 			int direction = RpgConstants.getDirection(role.paths.get(0),role.paths.get(1));
@@ -169,7 +173,9 @@ public final class RpgController extends AbstarctController{
           && !role.isInjury()){
         role.setDirection(MathUtils.getRandomGen().nextInt(8));
         role.setMoving(MathUtils.getRandomGen().nextInt(4) == 1);
-      }
+      }else {
+	  	role.setSpriteState(SpriteState.STAND);
+	  }
     }
   }
 
@@ -184,7 +190,6 @@ public final class RpgController extends AbstarctController{
       for(Tepleporter event : transfers){
 		  for(Sprite role : map.getRoles())
 		  {
-		  	role.print();
 		  	if(role.getId().equals(ic.getHeroId()))
 			{
 				MapContainer temp = event.send(role);
@@ -193,10 +198,10 @@ public final class RpgController extends AbstarctController{
 					ic.actions.add("changemap "+role.getId()+" "+map.getId()+" "
 						+temp.getId()+" "+event.getTransfer().x+" "+event.getTransfer().y);
 					next = new RpgController(temp,ic);
+					return next;
 			    }
 			}
 		  }
-          break;
       }
     }
 

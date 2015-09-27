@@ -142,8 +142,8 @@ public class ImageUtils{
   }
 
   public static Image[][] split(Image source, int width, int height){
-    int cols = (int) source.getWidth() / width;
-    int rows = (int) source.getHeight() / height;
+  	int cols = (int) source.getWidth() / width;
+	int rows = (int) source.getHeight() / height;
     Image[][] result = new Image[rows][cols];
     for(int i = 0; i < rows; i++){
       for(int j = 0; j < cols; j++){
