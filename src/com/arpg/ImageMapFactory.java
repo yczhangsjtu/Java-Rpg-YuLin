@@ -78,13 +78,13 @@ public class ImageMapFactory{
    * @param mousePoint
    * @return
    */
-  public int getDeflateImageX(boolean isHeroMapLeft, Point mousePoint){
-    int value = isHeroMapLeft ? (RpgConstants.CANVAS_WIDTH - MIN_WIDTH - MAP_PADDING) : MAP_PADDING;
+  public int getDeflateImageX(Point mousePoint){
+    int value = RpgConstants.CANVAS_WIDTH - MIN_WIDTH - MAP_PADDING;
     /* 判断是否鼠标在该小地图的显示范围 */
     if(mousePoint != null
         && MathUtils.isInRectangle(value, 0, MIN_WIDTH + MAP_PADDING, MIN_HEIGHT + MAP_PADDING,
             mousePoint)){
-      value = isHeroMapLeft ? MAP_PADDING : (RpgConstants.CANVAS_WIDTH - MIN_WIDTH - MAP_PADDING);
+      value = MAP_PADDING;
     }
 
     return value;

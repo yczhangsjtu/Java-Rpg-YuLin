@@ -13,17 +13,12 @@ import javafx.scene.canvas.GraphicsContext;
  * 
  */
 public class SpriteContainer implements Comparator<Sprite>{
-  private Sprite hero;
-  /**
-   * 地图上所有角色,包括hero
-   */
   private Set<Sprite> characters = new TreeSet<Sprite>(this);
 
   public SpriteContainer(){
   }
 
   public void setHero(Sprite role){
-    this.hero = role;
     this.characters.add(role);
   }
 
@@ -96,10 +91,6 @@ public class SpriteContainer implements Comparator<Sprite>{
 
   public void removeCharacter(Sprite sprite){
     this.characters.remove(sprite);
-  }
-
-  public Sprite getHero(){
-    return hero;
   }
 
   /**

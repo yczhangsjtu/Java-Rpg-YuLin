@@ -1,6 +1,13 @@
 package com.arpg.index;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.awt.Point;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.StringTokenizer;
+import java.util.List;
+import java.util.LinkedList;
 
 import javafx.event.Event;
 import javafx.scene.Node;
@@ -18,10 +25,12 @@ import com.arpg.RpgController;
 import com.arpg.fight.Magic;
 import com.arpg.sprite.Sprite;
 import com.arpg.sprite.SpriteType;
+import com.arpg.utils.IOUtils;
 import com.arpg.utils.ImageUtils;
 import com.arpg.utils.JavafxImageWriter;
 import com.arpg.utils.ResourceManager;
 import com.arpg.utils.RpgConstants;
+import com.arpg.utils.LineReader;
 
 /**
  * 游戏启动界面
@@ -30,73 +39,310 @@ import com.arpg.utils.RpgConstants;
  *
  */
 public final class IndexController extends AbstarctController{
-  private static Image bg = ResourceManager.loadImage("resource/image/index/index.png");
-  private Controller next;
-  private StackPane menu;
+	private static Image bg = ResourceManager.loadImage("resource/image/index/index.png");
+	private Controller next;
+	private StackPane menu;
 
-  public IndexController(){
-    menu = new StackPane();
-    menu.getChildren().add(new ImageView(initIndexImage(300, 240)));
-    menu.setLayoutX(RpgConstants.CANVAS_WIDTH / 2 - 200);
-    menu.setLayoutY(RpgConstants.CANVAS_HEIGHT / 2 - 120);
+	private HashMap<String,MapContainer> maps;
+	private HashMap<String,Sprite> sprites;
+	public LinkedList<String> actions;
+	public String hero = null;
+
+	public IndexController(){
+		menu = new StackPane();
+		menu.getChildren().add(new ImageView(initIndexImage(300, 240)));
+		menu.setLayoutX(RpgConstants.CANVAS_WIDTH / 2 - 200);
+		menu.setLayoutY(RpgConstants.CANVAS_HEIGHT / 2 - 120);
+		maps = new HashMap<String,MapContainer>();
+		sprites = new HashMap<String,Sprite>();
+		actions = new LinkedList<String>();
+	}
+
+	@Override
+	public void draw(GraphicsContext context){
+		context.drawImage(bg, 0, 0);
+	}
+
+	@Override
+	public void handle(Event event){
+		if(event.getEventType() == MouseEvent.MOUSE_CLICKED){
+			enter();
+		}
+	}
+
+	public String getHeroId()
+	{
+		return hero;
+	}
+
+	public void exec(String script)
+	{
+		String instruct = null, obj = null;
+		String param1 = null, param2 = null, param3 = null, param4 = null, param5 = null;
+
+		StringTokenizer token = new StringTokenizer(script);
+		if(token.hasMoreTokens())
+			instruct = token.nextToken();
+		if(token.hasMoreTokens())
+			obj = token.nextToken();
+		if(token.hasMoreTokens())
+			param1 = token.nextToken();
+		if(token.hasMoreTokens())
+			param2 = token.nextToken();
+		if(token.hasMoreTokens())
+			param3 = token.nextToken();
+		if(token.hasMoreTokens())
+			param4 = token.nextToken();
+		if(token.hasMoreTokens())
+			param5 = token.nextToken();
+
+		if("map".equals(instruct)){
+			maps.put(obj,new MapContainer(param1,param2,param3,this,obj));
+		}else if("sprite".equals(instruct)){
+			sprites.put(obj,new Sprite(param1,getRpgConstant(param2),obj));
+		}else if("setpos".equals(instruct)){
+			int X = Integer.parseInt(param1), Y = Integer.parseInt(param2);
+			sprites.get(obj).setPosition(new Point(X,Y));
+		}else if("setname".equals(instruct)){
+			sprites.get(obj).setName(param1);
+		}else if("addmagic".equals(instruct)){
+			int f = Integer.parseInt(param3);
+			Color c = getColor(param4);
+			sprites.get(obj).addMagic(new Magic(param1, param2, f, c));
+		}else if("setdefeatless".equals(instruct)){
+			sprites.get(obj).setDefeatless();
+		}else if("sethero".equals(instruct)){
+			this.hero = obj;
+		}else if("addscript".equals(instruct)){
+			sprites.get(obj).addScript(param1,param2);
+		}else if("settype".equals(instruct)){
+			sprites.get(obj).setSpriteType(getType(param1));
+		}else if("addsprite".equals(instruct)){
+			maps.get(obj).addCharacter(sprites.get(param1));
+		}else if("addaction".equals(instruct)){
+			actions.add(transformToAction(obj));
+		}else if("readaction".equals(instruct)){
+			readActionFile(obj);
+		}else if("transfer".equals(instruct)){
+			int x1 = Integer.parseInt(param1);
+			int y1 = Integer.parseInt(param2);
+			int x2 = Integer.parseInt(param4);
+			int y2 = Integer.parseInt(param5);
+			maps.get(obj).addTransfer(x1,y1,maps.get(param3),x2,y2);
+		}else if("follow".equals(instruct)){
+			sprites.get(obj).follow(sprites.get(param1));
+		}else if("start".equals(instruct)){
+			next = new RpgController(maps.get(obj),this);
+		}
+	}
+
+	public boolean act(String action)
+	{
+		String instruct = null, obj = null;
+		String param1 = null, param2 = null, param3 = null, param4 = null, param5 = null;
+		
+		StringTokenizer token = new StringTokenizer(action);
+		if(token.hasMoreTokens())
+			instruct = token.nextToken();
+		if(token.hasMoreTokens())
+			obj = token.nextToken();
+		if(token.hasMoreTokens())
+			param1 = token.nextToken();
+		if(token.hasMoreTokens())
+			param2 = token.nextToken();
+		if(token.hasMoreTokens())
+			param3 = token.nextToken();
+		if(token.hasMoreTokens())
+			param4 = token.nextToken();
+		if(token.hasMoreTokens())
+			param5 = token.nextToken();
+
+		if("move".equals(instruct))
+		{
+			Sprite sprite = sprites.get(obj);
+			int x = Integer.parseInt(param2), y = Integer.parseInt(param3);
+			sprite.paths = maps.get(param1).findPath(sprite.getPoint(), new Point(x,y));
+			return true;
+		}
+		if("moveup".equals(instruct))
+		{
+			Sprite sprite = sprites.get(obj);
+			if(!sprite.isMoving()){
+				sprite.setDirection(RpgConstants.UP);
+				sprite.setMoving(true);
+			}
+			return true;
+		}
+		if("movedown".equals(instruct))
+		{
+			Sprite sprite = sprites.get(obj);
+			if(!sprite.isMoving()){
+				sprite.setDirection(RpgConstants.DOWN);
+				sprite.setMoving(true);
+			}
+			return true;
+		}
+		if("moveleft".equals(instruct))
+		{
+			Sprite sprite = sprites.get(obj);
+			if(!sprite.isMoving()){
+				sprite.setDirection(RpgConstants.LEFT);
+				sprite.setMoving(true);
+			}
+			return true;
+		}
+		if("moveright".equals(instruct))
+		{
+			Sprite sprite = sprites.get(obj);
+			if(!sprite.isMoving()){
+				sprite.setDirection(RpgConstants.RIGHT);
+				sprite.setMoving(true);
+			}
+			return true;
+		}
+		if("goto".equals(instruct))
+		{
+			Sprite sprite = sprites.get(obj);
+			Sprite dest = sprites.get(param1);
+			sprite.dest = dest;
+			sprite.startTalk(dest);
+			return true;
+		}
+		if("changemap".equals(instruct))
+		{
+			Sprite sprite = sprites.get(obj);
+			MapContainer map = maps.get(param1);
+			MapContainer dest = maps.get(param2);
+			int x = Integer.parseInt(param3), y = Integer.parseInt(param4);
+			map.removeSprite(sprite);
+			dest.addCharacter(sprite);
+			sprite.setPosition(new Point(x,y));
+			for(Sprite follower : map.getRoles())
+			{
+				if(follower.following == sprite)
+				{
+					map.removeSprite(follower);
+					dest.addCharacter(follower);
+					follower.setPosition(new Point(x,y));
+				}
+			}
+			return true;
+		}
+		if("checkpos".equals(instruct))
+		{
+			Sprite sprite = sprites.get(obj);
+			int x = Integer.parseInt(param2), y = Integer.parseInt(param3);
+			return sprite.getX() == x && sprite.getY() == y &&
+			   sprite.getMapContainer() == maps.get(param1);
+		}
+		if("checkclose".equals(instruct))
+		{
+			Sprite sprite = sprites.get(obj);
+			Sprite dest = sprites.get(param1);
+			return sprite.getX() >= dest.getX()-1 && sprite.getX() <= dest.getX()+1
+			 &&sprite.getY() >= dest.getY()-1 && sprite.getY() <= dest.getY()+1;
+		}
+		if("disablecontrol".equals(instruct))
+		{
+			this.hero = "";
+			return true;
+		}
+		if("sethero".equals(instruct)){
+			this.hero = obj;
+			return true;
+		}
+
+		return true;
+	}
+
+	private String transformToAction(String script)
+	{
+		return script.replace('_',' ');
+	}
+
+	private void readActionFile(String filename)
+	{
+		String path = "src/com/arpg/index/"+filename;
+		BufferedReader reader = null;
+		try
+		{
+			reader = new BufferedReader(new FileReader(path));
+			String statement = null;
+			while((statement = reader.readLine()) != null){
+				statement = statement.trim();
+				if(statement.length() == 0)
+					continue;
+				if(statement.startsWith("//") || statement.startsWith("#"))
+					continue;
+				actions.add(statement);
+		}
+	}
+	catch(Exception e){
+		e.printStackTrace();
+	}finally{
+		IOUtils.closeQuietly(reader);
+	}
   }
 
-  @Override
-  public void draw(GraphicsContext context){
-    context.drawImage(bg, 0, 0);
+  private void loadIndexFile(String filename)
+  {
+  	String path = "src/com/arpg/index/"+filename;
+  	BufferedReader reader = null;
+	LineReader scripts = new LineReader();
+  	try
+	{
+		reader = new BufferedReader(new FileReader(path));
+		String statement = null;
+		while((statement = reader.readLine()) != null){
+			statement = statement.trim();
+			if(statement.length() == 0)
+				continue;
+			if(statement.startsWith("//") || statement.startsWith("#"))
+				continue;
+			scripts.addLine(statement);
+		}
+	}
+	catch(Exception e){
+		e.printStackTrace();
+	}finally{
+		IOUtils.closeQuietly(reader);
+	}
+
+	while(scripts.hasNext()){
+		String script = scripts.next();
+		exec(script);
+	}
   }
 
-  @Override
-  public void handle(Event event){
-    if(event.getEventType() == MouseEvent.MOUSE_CLICKED){
-      enter();
-    }
+  private SpriteType getType(String type)
+  {
+  	if("NPC".equals(type)) return SpriteType.NPC;
+  	if("MONSTER".equals(type)) return SpriteType.MONSTER;
+	return null;
+  }
+
+  private int getRpgConstant(String cst)
+  {
+  	if("LEFT".equals(cst)) return RpgConstants.LEFT;
+  	if("RIGHT".equals(cst)) return RpgConstants.RIGHT;
+  	if("UP".equals(cst)) return RpgConstants.UP;
+  	if("DOWN".equals(cst)) return RpgConstants.DOWN;
+	return 0;
+  }
+
+  private Color getColor(String color)
+  {
+  	if("RED".equals(color)) return Color.RED;
+  	if("GRAY".equals(color)) return Color.GRAY;
+  	if("GREEN".equals(color)) return Color.GREEN;
+  	if("SKYBLUE".equals(color)) return Color.SKYBLUE;
+  	if("YELLOW".equals(color)) return Color.YELLOW;
+  	if("SNOW".equals(color)) return Color.SNOW;
+	return null;
   }
 
   private void enter(){
-    MapContainer map = new MapContainer("resource/image/map/map.png",
-		"resource/image/map/map.map","家");
-    map.showGrid(false);
-
-    Sprite hero = new Sprite("resource/image/role/gm.png", RpgConstants.DOWN);
-    hero.setPosition(new Point(7, 8));
-    hero.setName("宇林");
-    hero.addMagic(new Magic("烈火", "resource/image/magic/fire.png", 19, Color.RED));
-    hero.addMagic(new Magic("狂风", "resource/image/magic/wind.png", 15, Color.GRAY));
-    hero.addMagic(new Magic("剧毒", "resource/image/magic/poison.png", 12, Color.GREEN));
-    hero.addMagic(new Magic("冰封", "resource/image/magic/ice.png", 13, Color.SKYBLUE));
-    hero.addMagic(new Magic("混乱", "resource/image/magic/confusion.png", 15, Color.YELLOW));
-    hero.addMagic(new Magic("雷电", "resource/image/magic/thunder.png", 20, Color.SNOW));
-	hero.setDefeatless();
-
-    Sprite npc = new Sprite("resource/image/role/assassin.png", RpgConstants.LEFT);
-    npc.addScript("ssxScript1.sc");
-    npc.addScript("ssxScript2.sc");
-    npc.setPosition(new Point(13, 10));
-    npc.setSpriteType(SpriteType.NPC);
-    npc.setName("盛舒湘");
-	// npc.follow();
-
-    map.initHero(hero);
-    map.addCharacter(npc);
-
-    MapContainer hill = new MapContainer("resource/image/map/hill.jpg",
-        "resource/image/map/hill.map","小山");
-    Sprite monster = new Sprite("resource/image/role/rogue.png", RpgConstants.LEFT);
-    monster.setPosition(new Point(15, 4));
-    monster.setName("小熊s");
-    monster.setSpriteType(SpriteType.MONSTER);
-    hill.addCharacter(monster);
-
-    MapContainer maze = new MapContainer("resource/image/map/maze.jpg",
-		"resource/image/map/maze.map","迷宫");
-	maze.showGrid(false);
-
-    map.addTransfer(22,1, hill,2,22);
-	hill.addTransfer(1,22,map,21,1);
-	hill.addTransfer(31,1,maze,1,14);
-	maze.addTransfer(1,13,hill,31,2);
-    next = new RpgController(map);
+	loadIndexFile("main.idx");
   }
 
   @Override

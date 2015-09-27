@@ -46,7 +46,7 @@ public class Tepleporter{
 
   public MapContainer send(Sprite sprite){
     MapContainer result = null;
-    if(sprite.isHero() && current.x == sprite.getX() && current.y == sprite.getY()){
+    if(current.x == sprite.getX() && current.y == sprite.getY()){
       result = map;
     }
 

@@ -16,11 +16,13 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 
 import com.arpg.AbstarctController;
+import com.arpg.index.IndexController;
 import com.arpg.utils.IOUtils;
 import com.arpg.utils.LineReader;
 import com.arpg.utils.NinePatch;
 import com.arpg.utils.RpgConstants;
 import com.arpg.utils.StringUtils;
+import com.arpg.sprite.Sprite;
 
 /**
  * 脚本执行器,主要负责对话剧情,不参与界面切换
@@ -29,6 +31,8 @@ import com.arpg.utils.StringUtils;
  *
  */
 public class ScriptController extends AbstarctController{
+  public Sprite talker1;
+  public Sprite talker2;
   private NinePatch ninePatch;
   private LineReader scripts;
   // 游戏脚本中的变量表
@@ -41,10 +45,10 @@ public class ScriptController extends AbstarctController{
   /* 对话框中多选用户选项 */
   private int select = -1;
   private double fontHeight;
-  public int state = -1;
-  LinkedList<String> switches = new LinkedList();
+  String target = null;
+  private IndexController ic = null;
 
-  public ScriptController(String scriptFile){
+  public ScriptController(String scriptFile, IndexController idx, Sprite s1, Sprite s2){
     if(!StringUtils.isBlank(scriptFile)){
       this.vars = new HashMap<String, String>();
       this.cgs = new LinkedHashMap<String, Cg>();
@@ -52,7 +56,10 @@ public class ScriptController extends AbstarctController{
       this.fontHeight = Message.getTextBounds("中文").getHeight();
 
       ninePatch = new NinePatch(Message.loadBorder(), 27);
+	  ic = idx;
     }
+	talker1 = s1;
+	talker2 = s2;
   }
 
   /**
@@ -128,11 +135,11 @@ public class ScriptController extends AbstarctController{
     this.message = null;
     this.selects = null;
     this.animateCounter = 2;
-	boolean normal = true;
 
     while(scripts.hasNext()){
       String instruct = null, obj = null;
       String ops = null, data = null;
+	  String para1 = null, para2 = null, para3 = null;
 
       String script = scripts.next();
       StringTokenizer token = new StringTokenizer(script);
@@ -144,10 +151,18 @@ public class ScriptController extends AbstarctController{
         ops = token.nextToken();
       if(token.hasMoreTokens())
         data = token.nextToken();
+      if(token.hasMoreTokens())
+        para1 = token.nextToken();
+      if(token.hasMoreTokens())
+        para2 = token.nextToken();
+      if(token.hasMoreTokens())
+        para3 = token.nextToken();
 	
-      if("set".equals(instruct) && normal){
+	  if(target!=null){
+	  	 if(target.equals(instruct)) target = null;
+      }else if("set".equals(instruct)){
         vars.put("#{" + obj + "}", data);
-      }else if("cg".equals(instruct) && normal){
+      }else if("cg".equals(instruct)){
         if("del".equals(obj)){
           if(ops == null)
             cgs.clear();
@@ -162,86 +177,28 @@ public class ScriptController extends AbstarctController{
 
           cgs.put(obj, new Cg(vars.get(obj), x, y));
         }
-      }else if("mes".equals(instruct) && normal){
+      }else if("mes".equals(instruct)){
         message = parseMes(obj);
         break;
-      }else if("state".equals(instruct) && normal){
-        state = Integer.parseInt(obj);
-      }else if("if".equals(instruct) && normal){
+      }else if("if".equals(instruct)){
 		boolean correct = parseBoolExp(obj);
-		if(correct)
-		{
-			switches.add("yes");
-			normal = true;
-		}
-		else
-		{
-			switches.add("no");
-			normal = false;
-		}
-	  }else if("elseif".equals(instruct)){
-	  	if(normal)
-		{
-			normal = false;
-		}
-		else
-		{
-			if(switches.getLast() == "no")
-			{
-				boolean correct = parseBoolExp(obj);
-				if(correct)
-				{
-					switches.pop();
-					switches.add("yes");
-				}
-			}
-		}
-	  }else if("endif".equals(instruct)){
-      }else if("if".equals(instruct) && normal){
-		boolean correct = parseBoolExp(obj);
-		if(correct)
-		{
-			switches.add("yes");
-			normal = true;
-		}
-		else
-		{
-			switches.add("no");
-			normal = false;
-		}
-	  }else if("elseif".equals(instruct)){
-	  	if(normal)
-		{
-			normal = false;
-		}
-		else
-		{
-			if(switches.getLast() == "no")
-			{
-				boolean correct = parseBoolExp(obj);
-				if(correct)
-				{
-					switches.pop();
-					switches.add("yes");
-				}
-			}
-		}
-	  }else if("endif".equals(instruct)){
-		normal = true;
-      }else if("in".equals(instruct) && normal){
+		if(correct) target = ops+":";
+      }else if("goto".equals(instruct)){
+	  	target = obj+":";
+      }else if("in".equals(instruct)){
         parseSelect();
         break;
-      }
+      }else{
+	  	if(ic != null && script != null)
+		{
+			ic.exec(script);
+		}
+	  }
     }
   }
 
-  public void setState(int s)
-  {
-  	state = s;
-  }
-
   private void readScript(String file){
-    String path = this.getClass().getResource("/com/arpg/avg/script/" + file).getFile();
+    String path = "src/com/arpg/avg/script/" + file;
     BufferedReader reader = null;
     try{
       reader = new BufferedReader(new FileReader(path));

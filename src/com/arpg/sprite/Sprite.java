@@ -3,6 +3,8 @@ package com.arpg.sprite;
 import java.awt.Point;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
@@ -28,6 +30,7 @@ public class Sprite{
   public static final double PROB_MOVE = 0.02;
   // 角色名称,战队
   private String name, group;
+  private String id;
   // 角色血量(当前值,最大值)
   private int hp = 900, maxHp = 1000;
   // 角色魔法值(当前值,最大值)
@@ -36,7 +39,10 @@ public class Sprite{
   private SpriteState state;
   private SpriteType type = SpriteType.PLAYER;
   // 每个精灵的脚本文件(随着剧情发展可而改变)
-  private ArrayList<String> script = new ArrayList();
+  private HashMap<String,String> script = new HashMap<String,String>();
+  public Sprite dest = null;
+  public Sprite following = null;
+  public Sprite talkTo = null;
 
   /* 精灵在Tile上的值 */
   private int x, y;
@@ -46,10 +52,7 @@ public class Sprite{
   /* 计步器 */
   private int stepCounter = 0;
   /**
-   * 是否正在移动
-   */
-  private volatile boolean moving;
-  /**
+   * 是否正在移动 */ private volatile boolean moving; /**
    * 修正精灵移动距离(当前Cell的移动距离),由于地图单元Cell长宽比较高,如果每次移动一个Tile则精灵移动轨迹会比较生硬。
    * 所以在精灵move过程中按speed移动, 当精灵移动超过一个
    * Cell宽高时,随即设置停止移动状态。而用户必须是当前精灵不在移动状态(moving)才能开始下一次移动(setMoving),
@@ -57,8 +60,7 @@ public class Sprite{
    */
   private int movingLength;
   /* 移动类型,npc为自由移动 */
-  private boolean autoMove;
-  private boolean following;
+  private boolean randomMove;
 
   private ImageSpriteFactory sfactory;
   private MapContainer map;
@@ -69,13 +71,13 @@ public class Sprite{
   private boolean defeatless = false;
   public List<Point> paths;
 
-  public Sprite(String spriteFile, int direction){
+  public Sprite(String spriteFile, int direction, String id){
     this.sfactory = new ImageSpriteFactory(spriteFile);
     this.state = SpriteState.RUN;
-    this.autoMove = true;
-	this.following = false;
+    this.randomMove = false;
     this.direction = direction;
     this.magics = new ArrayList<Magic>();
+	this.id = id;
   }
 
   /**
@@ -112,16 +114,31 @@ public class Sprite{
    * @return
    */
   public Sprite talkWith(int x, int y){
-    Sprite talkTo = null;
     for(Sprite sprite : map.getRoles()){
-      if(!sprite.isHero() && x >= sprite.getX() - 1 && x <= sprite.getX() && y >= sprite.getY() - 3
-          && y < sprite.getY()){
+      if(x >= sprite.getX() - 1 && x <= sprite.getX() && y >= sprite.getY() - 3
+          && y <= sprite.getY()){
         talkTo = sprite;
         break;
       }
     }
-
     return talkTo;
+  }
+
+  public Sprite canTalkWith(int x, int y){
+  	Sprite talk = null;
+    for(Sprite sprite : map.getRoles()){
+      if(x >= sprite.getX() - 1 && x <= sprite.getX() && y >= sprite.getY() - 3
+          && y <= sprite.getY()){
+        talk = sprite;
+        break;
+      }
+    }
+    return talk;
+  }
+
+  public void startTalk(Sprite sprite)
+  {
+  	talkTo = sprite;
   }
 
   /**
@@ -322,12 +339,21 @@ public class Sprite{
     this.map = map;
   }
 
+  public MapContainer getMapContainer()
+  {
+  	return this.map;
+  }
+
   public void setName(String name){
     this.name = name;
   }
 
   public String getName(){
     return name;
+  }
+
+  public String getId(){
+  	return id;
   }
 
   public void setGroup(String group){
@@ -346,11 +372,8 @@ public class Sprite{
     return magics;
   }
 
-  public String getScript(){
-  	if(script.size() > 0)
-		return script.get(0);
-	else
-		return null;
+  public String getScript(String to){
+	return script.get(to);
   }
 
   public void print()
@@ -363,8 +386,8 @@ public class Sprite{
    * 
    * @param script
    */
-  public void addScript(String script){
-    this.script.add(script);
+  public void addScript(String talkto, String script){
+    this.script.put(talkto,script);
   }
 
   public void removeScript()
@@ -500,8 +523,13 @@ public class Sprite{
     movingLength = 0;
   }
 
-  public void setAutoMove(boolean autoMove){
-    this.autoMove = autoMove;
+  public void setRandomMove(boolean randomMove){
+    this.randomMove = randomMove;
+  }
+
+  public boolean randomMoving()
+  {
+  	return this.randomMove;
   }
 
   /**
@@ -519,26 +547,17 @@ public class Sprite{
     return new Point(x, y);
   }
 
-  /**
-   * 当前精灵是否为英雄
-   * 
-   * @return
-   */
-  public boolean isHero(){
-    return !autoMove;
+  public Sprite destSprite(){
+  	return dest;
   }
 
-  public boolean isFollowing(){
-  	return following;
+  public void follow(Sprite sprite){
+  	following = sprite;
   }
 
-  public void follow(){
-  	following = true;
-  }
-
-  public void dontFollow()
+  public void stopFollow()
   {
-  	following = false;
+  	following = null;
   }
 
   public int getX(){

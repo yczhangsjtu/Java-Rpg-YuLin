@@ -15,6 +15,7 @@ import com.arpg.utils.FontUtils;
 import com.arpg.utils.ImageUtils;
 import com.arpg.utils.MathUtils;
 import com.arpg.utils.RpgConstants;
+import com.arpg.index.IndexController;
 
 /**
  * 地图容器
@@ -36,14 +37,22 @@ public class MapContainer{
   private int lastTileX;
   private int lastTileY;
 
+  public int offsetX;
+  public int offsetY;
+
+  public IndexController ic = null;
+  private String id = null;
+
   private boolean showGrid = false;
 
-  public MapContainer(String bgfile, String mapFile, String mapname){
+  public MapContainer(String bgfile, String mapFile, String mapname, IndexController ic, String id){
     int point = bgfile.lastIndexOf(".");
     this.factory = new ImageMapFactory(bgfile, bgfile.substring(0, point) + "_front.png", mapFile);
     this.sprites = new SpriteContainer();
     this.transfers = new LinkedList<Tepleporter>();
 	this.name = mapname;
+	this.ic = ic;
+	this.id = id;
   }
 
   public void draw(GraphicsContext context, Point mousePoint){
@@ -125,12 +134,12 @@ public class MapContainer{
    */
   private void drawMiniature(GraphicsContext context, Point mousePoint){
     context.setGlobalAlpha(0.6);
-    int minX = factory.getDeflateImageX(isMapLeft(getHero().getPx()), mousePoint);
+    int minX = factory.getDeflateImageX(mousePoint);
     context.drawImage(factory.getDeflateImage(), minX, factory.getDeflateImageY());
     for(Sprite sprite : sprites.getCharacters()){
       double sx = factory.getDeflateX() * sprite.getX() * RpgConstants.CS;
       double sy = factory.getDeflateY() * sprite.getY() * RpgConstants.CS;
-      ImageUtils.drawHexagram(context, sprite.isHero() ? Color.RED : Color.BLUE, minX + sx,
+      ImageUtils.drawHexagram(context, Color.RED, minX + sx,
           factory.getDeflateImageY() + sy, 5);
     }
     context.setGlobalAlpha(1.0d);
@@ -192,6 +201,10 @@ public class MapContainer{
     return name;
   }
 
+  public String getId(){
+  	return id;
+  }
+
   /**
    * 获取整个地图宽
    * 
@@ -224,11 +237,11 @@ public class MapContainer{
    * @return
    */
   public int getOffsetX(){
-    // X偏移位置
-    int offsetX = RpgConstants.CANVAS_WIDTH / 2 - sprites.getHero().getPx();
-    offsetX = Math.min(offsetX, 0);
-    offsetX = Math.max(offsetX, RpgConstants.CANVAS_WIDTH - getWidth());
-    return offsetX;
+	Sprite hero = getHero();
+	if(hero != null) offsetX = RpgConstants.CANVAS_WIDTH / 2 - hero.getPx();
+	offsetX = Math.min(offsetX, 0);
+	offsetX = Math.max(offsetX, RpgConstants.CANVAS_WIDTH - getWidth());
+	return offsetX;
   }
 
   /**
@@ -237,12 +250,11 @@ public class MapContainer{
    * @return
    */
   public int getOffsetY(){
-    // Y偏移位置
-    int offsetY = RpgConstants.CANVAS_HEIGHT / 2 - sprites.getHero().getPy();
-    // 计算Y偏移量
-    offsetY = Math.min(offsetY, 0);
-    offsetY = Math.max(offsetY, RpgConstants.CANVAS_HEIGHT - getHeight());
-    return offsetY;
+	Sprite hero = getHero();
+	if(hero != null) offsetY = RpgConstants.CANVAS_HEIGHT / 2 - hero.getPy();
+	offsetY = Math.min(offsetY, 0);
+	offsetY = Math.max(offsetY, RpgConstants.CANVAS_HEIGHT - getHeight());
+	return offsetY;
   }
 
   public int getFirstTileX(){
@@ -268,28 +280,14 @@ public class MapContainer{
    * @return
    */
   public Sprite getHero(){
-    return sprites.getHero();
-  }
-
-  /**
-   * 当前x坐标是否在地图左边
-   * 
-   * @param x
-   * @return
-   */
-  boolean isMapLeft(int x){
-    return x + getOffsetX() < RpgConstants.CANVAS_WIDTH / 2;
-  }
-
-  /**
-   * 初始化地图Hero,同时将设置精灵所在地图为本地图
-   * 
-   * @param hero
-   */
-  public void initHero(Sprite hero){
-    hero.setAutoMove(false);
-    sprites.setHero(hero);
-    hero.setMapContainer(this);
+  	for(Sprite sprite : sprites.getCharacters())
+	{
+		if(sprite.getId().equals(ic.getHeroId()))
+		{
+			return sprite;
+		}
+	}
+	return null;
   }
 
   /**
