@@ -50,6 +50,9 @@ classfilelist=$(path)AbstarctController.class\
 $(goal): $$(subst class,java,$$(subst build,src,$$@)) $(classfilelist)
 	$(javafxc) $<
 
+editor: $(subst build,src,$(path))editor/MapEditor.java
+	$(javafxc) $<
+
 $(path)AbstarctController.class: $$(subst class,java,$$(subst build,src,$$@))
 	$(javafxc) $<
 
