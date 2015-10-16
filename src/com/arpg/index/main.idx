@@ -54,6 +54,76 @@ setname nitingyun 无名氏
 setpos nitingyun 30 15
 settype nitingyun NPC
 
+sprite black1 resource/image/role/black.png UP
+setname black1 黑衣人
+setpos black1 8 16
+settype black1 NPC
+
+sprite black2 resource/image/role/black.png UP
+setname black2 黑衣人
+setpos black2 9 16
+settype black2 NPC
+
+sprite black3 resource/image/role/black.png UP
+setname black3 黑衣人
+setpos black3 10 16
+settype black3 NPC
+
+sprite black4 resource/image/role/black.png UP
+setname black4 黑衣人
+setpos black4 8 17
+settype black4 NPC
+
+sprite black5 resource/image/role/black.png UP
+setname black5 黑衣人
+setpos black5 9 17
+settype black5 NPC
+
+sprite black6 resource/image/role/black.png UP
+setname black6 黑衣人
+setpos black6 10 17
+settype black6 NPC
+
+sprite black7 resource/image/role/black.png UP
+setname black7 黑衣人
+setpos black7 11 4
+settype black7 NPC
+
+sprite white1 resource/image/role/white.png DOWN
+setname white1 白衣人
+setpos white1 11 5
+settype white1 NPC
+
+sprite white2 resource/image/role/white.png DOWN
+setname white2 白衣人
+setpos white2 12 4
+settype white2 NPC
+
+sprite white3 resource/image/role/white.png DOWN
+setname white3 白衣人
+setpos white3 12 5
+settype white3 NPC
+
+sprite white4 resource/image/role/white.png DOWN
+setname white4 白衣人
+setpos white4 13 4
+settype white4 NPC
+
+sprite white5 resource/image/role/white.png DOWN
+setname white5 白衣人
+setpos white5 13 5
+settype white5 NPC
+
+sprite white6 resource/image/role/white.png DOWN
+setname white6 白衣人
+setpos white6 14 4
+settype white6 NPC
+
+sprite white7 resource/image/role/white.png DOWN
+setname white7 白衣人
+setpos white7 14 5
+settype white7 NPC
+
 # Scripts
 
 addscript yulin luwenlong llwScript1.sc

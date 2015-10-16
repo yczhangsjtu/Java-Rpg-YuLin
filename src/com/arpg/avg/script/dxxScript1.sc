@@ -1,5 +1,5 @@
 begin:
 
-fight
+setfighter yulin dongxixue
 
 end:

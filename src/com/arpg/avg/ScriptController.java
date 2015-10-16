@@ -31,8 +31,6 @@ import com.arpg.sprite.Sprite;
  *
  */
 public class ScriptController extends AbstarctController{
-  public Sprite talker1;
-  public Sprite talker2;
   private NinePatch ninePatch;
   private LineReader scripts;
   // 游戏脚本中的变量表
@@ -47,9 +45,9 @@ public class ScriptController extends AbstarctController{
   private double fontHeight;
   String target = null;
   private IndexController ic = null;
-  public boolean toFight = false;
 
-  public ScriptController(String scriptFile, IndexController idx, Sprite s1, Sprite s2){
+  public ScriptController(String scriptFile, IndexController idx){
+    ic = idx;
     if(!StringUtils.isBlank(scriptFile)){
       this.vars = new HashMap<String, String>();
       this.cgs = new LinkedHashMap<String, Cg>();
@@ -57,10 +55,7 @@ public class ScriptController extends AbstarctController{
       this.fontHeight = Message.getTextBounds("中文").getHeight();
 
       ninePatch = new NinePatch(Message.loadBorder(), 27);
-	  ic = idx;
     }
-	talker1 = s1;
-	talker2 = s2;
   }
 
   /**
@@ -144,6 +139,7 @@ public class ScriptController extends AbstarctController{
 
       String script = scripts.next();
       StringTokenizer token = new StringTokenizer(script);
+	  System.out.println("Executing script: "+script);
       if(token.hasMoreTokens())
         instruct = token.nextToken();
       if(token.hasMoreTokens())
@@ -189,8 +185,6 @@ public class ScriptController extends AbstarctController{
       }else if("in".equals(instruct)){
         parseSelect();
         break;
-	  }else if("fight".equals(instruct)){
-	  	toFight = true;
       }else{
 	  	if(ic != null && script != null)
 		{

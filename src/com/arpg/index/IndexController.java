@@ -22,6 +22,7 @@ import com.arpg.AbstarctController;
 import com.arpg.Controller;
 import com.arpg.MapContainer;
 import com.arpg.RpgController;
+import com.arpg.avg.ScriptController;
 import com.arpg.fight.Magic;
 import com.arpg.sprite.Sprite;
 import com.arpg.sprite.SpriteType;
@@ -47,6 +48,9 @@ public final class IndexController extends AbstarctController{
 	private HashMap<String,Sprite> sprites;
 	public LinkedList<String> actions;
 	public String hero = null;
+	public Sprite fighter1 = null;
+	public Sprite fighter2 = null;
+	public ScriptController sc = null;
 
 	public IndexController(){
 		menu = new StackPane();
@@ -133,6 +137,9 @@ public final class IndexController extends AbstarctController{
 			sprites.get(obj).follow(sprites.get(param1));
 		}else if("start".equals(instruct)){
 			next = new RpgController(maps.get(obj),this);
+		}else if("setfighter".equals(instruct)){
+			this.fighter1 = sprites.get(obj);
+			this.fighter2 = sprites.get(param1);
 		}
 	}
 
@@ -248,6 +255,14 @@ public final class IndexController extends AbstarctController{
 		}
 		if("sethero".equals(instruct)){
 			this.hero = obj;
+			return true;
+		}
+		if("addsprite".equals(instruct)){
+			maps.get(obj).addCharacter(sprites.get(param1));
+			return true;
+		}
+		if("startscript".equals(instruct)){
+			this.sc = new ScriptController(obj,this);
 			return true;
 		}
 

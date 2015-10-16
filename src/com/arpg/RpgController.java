@@ -28,12 +28,10 @@ import com.arpg.utils.RpgConstants;
  */
 public final class RpgController extends AbstarctController{
   /* 游戏剧情脚本控制器 */
-  private ScriptController sc;
   private FightController fc;
   private IndexController ic;
   // 是否可以发生战斗
   private boolean fighting = false;
-  // 当前英雄在追逐精灵(在自由寻路时此为null)
 
   private MapContainer map;
 
@@ -43,8 +41,8 @@ public final class RpgController extends AbstarctController{
   }
 
   public void handle(Event event){
-    if(sc != null && sc.isRunning()){
-      sc.handle(event);
+    if(ic.sc != null && ic.sc.isRunning()){
+      ic.sc.handle(event);
       return;
     }
 
@@ -81,29 +79,26 @@ public final class RpgController extends AbstarctController{
 
   public void draw(GraphicsContext context){
     map.draw(context, getMousePoint());
-  	if(sc != null)
+  	if(ic.sc != null)
 	{
-		if(sc.isRunning()) sc.draw(context);
+		if(ic.sc.isRunning()) ic.sc.draw(context);
 		else 
 		{
-			if(sc.toFight)
+			if(ic.fighter1 != null && ic.fighter2 != null && ic.fighter1 != ic.fighter2)
 			{
-				if(sc.talker1.getId().equals(ic.getHeroId()))
+				if(ic.fighter1.getId().equals(ic.getHeroId()))
 				{
 					this.fighting = true;
-					this.fc = new FightController(this, sc.talker1, sc.talker2);
+					this.fc = new FightController(this, ic.fighter1, ic.fighter2);
 				}
-				else if(sc.talker2.getId().equals(ic.getHeroId()))
+				else if(ic.fighter2.getId().equals(ic.getHeroId()))
 				{
 					this.fighting = true;
-					this.fc = new FightController(this, sc.talker2, sc.talker1);
+					this.fc = new FightController(this, ic.fighter2, ic.fighter1);
 				}
 			}
-			sc.talker1.talkTo = null;
-			sc.talker2.talkTo = null;
-			sc = null;
+			ic.sc = null;
 		}
-			
 		return;
 	}
 	if(ic.actions.size() > 0)
@@ -137,7 +132,9 @@ public final class RpgController extends AbstarctController{
 	  	if(role.getX() >= partner.getX()-1 && role.getX() <= partner.getX()+1
 		 &&role.getY() >= partner.getY()-1 && role.getY() <= partner.getY()+1)
 		 {
-			sc = new ScriptController(role.getScript(partner.getId()),ic,role,partner);
+		 	role.talkTo = null;
+			System.out.println(role.getName() + " is talking to " + partner.getName());
+			ic.sc = new ScriptController(role.getScript(partner.getId()),ic);
 			return;
 		}
       }

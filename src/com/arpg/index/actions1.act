@@ -1,3 +1,65 @@
 move wuqian field1 10 10
-move jinpeng field1 14 10
-move nitingyun field1 17 10
+move jinpeng field1 13 10
+move nitingyun field1 15 10
+checkpos wuqian field1 10 10
+startscript wqScript1.sc
+addsprite field1 black1
+addsprite field1 black2
+addsprite field1 black3
+addsprite field1 black4
+addsprite field1 black5
+addsprite field1 black6
+addsprite field1 black7
+addsprite field1 white1
+addsprite field1 white2
+addsprite field1 white3
+addsprite field1 white4
+addsprite field1 white5
+addsprite field1 white6
+addsprite field1 white7
+move black1 field1 4 12
+move black2 field1 3 10
+move black3 field1 2 11
+move black4 field1 4 9
+move black5 field1 3 12
+move black6 field1 4 10
+move black7 field1 3 9
+move white1 field1 4 6
+move white2 field1 5 6
+move white3 field1 4 7
+move white4 field1 5 7
+move white5 field1 6 7
+move white6 field1 4 8
+move white7 field1 5 8
+checkpos black1 field1 4 12
+checkpos black2 field1 3 10
+checkpos black3 field1 2 11
+checkpos black4 field1 4 9
+checkpos black5 field1 3 12
+checkpos black6 field1 4 10
+checkpos black7 field1 3 9
+checkpos white1 field1 4 6
+checkpos white2 field1 5 6
+checkpos white3 field1 4 7
+checkpos white4 field1 5 7
+checkpos white5 field1 6 7
+checkpos white6 field1 4 8
+checkpos white7 field1 5 8
+moveright black1
+moveright black2
+moveright black3
+moveright black4
+moveright black5
+moveright black6
+moveright black7
+moveright white1
+moveright white2
+moveright white3
+moveright white4
+moveright white5
+moveright white6
+moveright white7
+startscript wqScript2.sc
+move black6 field1 8 10
+checkpos black6 field1 8 10
+startscript wqScript3.sc
