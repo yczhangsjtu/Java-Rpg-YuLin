@@ -621,5 +621,10 @@ public class Sprite{
   {
   	defeatless = true;
   }
+	
+	public boolean isHero() {
+		// TODO Auto-generated method stub
+		return false;
+	}
 
 }
