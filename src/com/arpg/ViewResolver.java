@@ -6,7 +6,6 @@ import javafx.scene.Node;
 import javafx.scene.canvas.GraphicsContext;
 
 import com.arpg.utils.ImageUtils;
-import com.sun.javafx.perf.PerformanceTracker;
 
 //SurfaceViewResovler
 public class ViewResolver implements EventHandler<Event>{
@@ -32,7 +31,7 @@ public class ViewResolver implements EventHandler<Event>{
   }
 
   public float getFps(Node node){
-    return PerformanceTracker.getSceneTracker(node.getScene()).getInstantFPS();
+    return 0;
   }
 
   /**

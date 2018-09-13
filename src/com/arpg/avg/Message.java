@@ -65,7 +65,7 @@ public class Message{
   }
 
   public static Dimension2D getTextBounds(String msg){
-    return FontUtils.getFontBounds(msg, msgFont);
+    return FontUtils.getFontBounds(msg);
   }
 
 }
